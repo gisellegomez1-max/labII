@@ -103,7 +103,7 @@ int main()
         break;
     }
     case 6:{
-        char sala[FILAS][COLUMNAS];
+        char sala[FILAS * COLUMNAS];
         inicializarSala(sala);
 
         int opcion;
@@ -128,10 +128,12 @@ int main()
                 cout << "Asiento (1-20): ";
                 cin >> asiento;
 
-                if (reservarAsiento(sala, fila, asiento)) {
+                if (!asientoValido(fila, asiento)) {
+                    cout << "Dato invalido: la fila debe ser A-O y el asiento 1-20." << endl;
+                } else if (reservarAsiento(sala, fila, asiento)) {
                     cout << "Asiento " << fila << asiento << " reservado con exito." << endl;
                 } else {
-                    cout << "No se pudo reservar (dato invalido o ya reservado)." << endl;
+                    cout << "El asiento " << fila << asiento << " ya estaba reservado." << endl;
                 }
 
             } else if (opcion == 3) {
@@ -143,10 +145,12 @@ int main()
                 cout << "Asiento (1-20): ";
                 cin >> asiento;
 
-                if (cancelarAsiento(sala, fila, asiento)) {
+                if (!asientoValido(fila, asiento)) {
+                    cout << "Dato invalido: la fila debe ser A-O y el asiento 1-20." << endl;
+                } else if (cancelarAsiento(sala, fila, asiento)) {
                     cout << "Reserva del asiento " << fila << asiento << " cancelada." << endl;
                 } else {
-                    cout << "No se pudo cancelar (dato invalido o ya estaba disponible)." << endl;
+                    cout << "El asiento " << fila << asiento << " ya estaba disponible." << endl;
                 }
             }
 
@@ -154,12 +158,66 @@ int main()
 
         break;
     }
-    case 7:
+
+    case 7:{
+        const int FILAS_IMG = 6;
+        const int COLUMNAS_IMG = 8;
+
+        int imagen[FILAS_IMG][COLUMNAS_IMG] = {
+            {0, 3, 4, 0, 0, 0, 6, 8},
+            {5, 13, 6, 0, 0, 0, 2, 3},
+            {2, 6, 2, 7, 3, 0, 10, 0},
+            {0, 0, 4, 15, 4, 1, 6, 0},
+            {0, 0, 7, 12, 6, 9, 10, 4},
+            {5, 0, 6, 10, 6, 4, 8, 0}
+        };
+
+        int estrellas = contarEstrellas(&imagen[0][0], FILAS_IMG, COLUMNAS_IMG);
+
+        cout << "Numero de estrellas encontradas: " << estrellas << endl;
+
         break;
-    case 8:
+    }
+    case 8: {
+        int A[4], B[4], C[4];
+
+        cout << "Rectangulo A" << endl;
+        cout << "  x: "; cin >> A[0];
+        cout << "  y: "; cin >> A[1];
+        cout << "  ancho: "; cin >> A[2];
+        cout << "  alto: "; cin >> A[3];
+
+        cout << "Rectangulo B" << endl;
+        cout << "  x: "; cin >> B[0];
+        cout << "  y: "; cin >> B[1];
+        cout << "  ancho: "; cin >> B[2];
+        cout << "  alto: "; cin >> B[3];
+
+        bool hayInterseccion = intersectarRectangulos(A, B, C);
+
+        if (hayInterseccion) {
+            cout << "Interseccion C = {" << C[0] << ", " << C[1] << ", "
+                 << C[2] << ", " << C[3] << "}" << endl;
+        } else {
+            cout << "Los rectangulos no se intersectan." << endl;
+        }
+
         break;
-    case 9:
+    }
+    case 9:{
+        int numero;
+        cout << "Ingrese un numero: ";
+        cin >> numero;
+
+        long resultado;
+        long *pResultado = &resultado;
+
+        sumaAmigables(numero, pResultado);
+
+        cout << "El resultado de la suma es: " << *pResultado << "." << endl;
+
         break;
+    }
     default:
         cout << "Ingresaste una opcion invalida";
     }

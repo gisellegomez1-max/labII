@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include "funciones.h"
 using namespace std;
 
@@ -130,7 +131,7 @@ long sumarPorGrupos(const char *cadena, int n) {
     if (resto != 0) {
         long numero = 0;
         for (int i = 0; i < resto; i++) {
-            numero = numero * 10 + (*ptr - '0'); // acumulamos digito a digito
+            numero = numero * 10 + (*ptr - '0');
             ptr++;
         }
         suma += numero;
@@ -147,79 +148,158 @@ long sumarPorGrupos(const char *cadena, int n) {
     return suma;
 }
 
-void inicializarSala(char sala[][COLUMNAS]) {
+void inicializarSala(char *sala) {
     for (int f = 0; f < FILAS; f++) {
         for (int c = 0; c < COLUMNAS; c++) {
-            // sala[f] es un puntero a la fila f (un arreglo de COLUMNAS chars)
-            // *(sala[f] + c) equivale a sala[f][c]
-            *(sala[f] + c) = DISPONIBLE;
+            *(sala + f * COLUMNAS + c) = DISPONIBLE;
         }
     }
 }
 
-void mostrarSala(char sala[][COLUMNAS]) {
-    // Encabezado con el numero de cada asiento (1-20)
-    cout << "     ";
+void mostrarSala(char *sala) {
+    cout << "    ";
     for (int c = 1; c <= COLUMNAS; c++) {
-        cout << (c < 10 ? "  " : " ") << c << " ";
+        cout << setw(3) << c;
     }
     cout << endl;
 
-    // Linea de borde superior: "    +----+----+...+"
     auto imprimirBorde = [&]() {
-        cout << "    +";
+        cout << "   +";
         for (int c = 0; c < COLUMNAS; c++) {
-            cout << "----+";
+            cout << "--+";
         }
         cout << endl;
     };
 
     imprimirBorde();
     for (int f = 0; f < FILAS; f++) {
-        char letraFila = 'A' + f; // convertir indice de fila a letra
-        cout << " " << letraFila << "  |";
+        char letraFila = 'A' + f;
+        cout << " " << letraFila << " |";
         for (int c = 0; c < COLUMNAS; c++) {
-            // *(sala[f] + c) equivale a sala[f][c]
-            cout << "  " << *(sala[f] + c) << " |";
+            cout << *(sala + f * COLUMNAS + c) << " |";
         }
         cout << endl;
-        imprimirBorde(); // borde despues de cada fila, como en el ejemplo
     }
+    imprimirBorde();
 }
 
-bool reservarAsiento(char sala[][COLUMNAS], char filaLetra, int asiento) {
-    int f = filaLetra - 'A'; // convertir letra a indice de fila
-    int c = asiento - 1;     // convertir numero de asiento a indice de columna
-
-    // Validar que la fila y el asiento esten dentro del rango permitido
-    if (f < 0 || f >= FILAS || c < 0 || c >= COLUMNAS) {
-        return false;
-    }
-
-    // Solo se puede reservar si esta disponible
-    if (*(sala[f] + c) == DISPONIBLE) {
-        *(sala[f] + c) = RESERVADO;
-        return true;
-    }
-
-    return false; // ya estaba reservado
-}
-
-bool cancelarAsiento(char sala[][COLUMNAS], char filaLetra, int asiento) {
+bool asientoValido(char filaLetra, int asiento) {
     int f = filaLetra - 'A';
     int c = asiento - 1;
+    return (f >= 0 && f < FILAS && c >= 0 && c < COLUMNAS);
+}
 
-    if (f < 0 || f >= FILAS || c < 0 || c >= COLUMNAS) {
+bool reservarAsiento(char *sala, char filaLetra, int asiento) {
+    if (!asientoValido(filaLetra, asiento)) {
         return false;
     }
 
-    // Solo se puede cancelar si estaba reservado
-    if (*(sala[f] + c) == RESERVADO) {
-        *(sala[f] + c) = DISPONIBLE;
+    int f = filaLetra - 'A';
+    int c = asiento - 1;
+    int indice = f * COLUMNAS + c;
+
+    if (*(sala + indice) == DISPONIBLE) {
+        *(sala + indice) = RESERVADO;
         return true;
     }
 
-    return false; // ya estaba disponible
+    return false;
+}
+
+bool cancelarAsiento(char *sala, char filaLetra, int asiento) {
+    if (!asientoValido(filaLetra, asiento)) {
+        return false;
+    }
+
+    int f = filaLetra - 'A';
+    int c = asiento - 1;
+    int indice = f * COLUMNAS + c;
+
+    if (*(sala + indice) == RESERVADO) {
+        *(sala + indice) = DISPONIBLE;
+        return true;
+    }
+
+    return false;
+}
+
+int contarEstrellas(int *matriz, int filas, int columnas) {
+    int contador = 0;
+
+    for (int i = 1; i < filas - 1; i++) {
+        for (int j = 1; j < columnas - 1; j++) {
+            int centro = *(matriz + i * columnas + j);
+            int arriba  = *(matriz + (i - 1) * columnas + j);
+            int abajo   = *(matriz + (i + 1) * columnas + j);
+            int izq     = *(matriz + i * columnas + (j - 1));
+            int der     = *(matriz + i * columnas + (j + 1));
+
+            double promedio = (centro + izq + der + arriba + abajo) / 5.0;
+
+            if (promedio > 6) {
+                contador++;
+            }
+        }
+    }
+
+    return contador;
+}
+
+bool intersectarRectangulos(const int *A, const int *B, int *C) {
+    int xA = *(A + 0), yA = *(A + 1), wA = *(A + 2), hA = *(A + 3);
+    int xB = *(B + 0), yB = *(B + 1), wB = *(B + 2), hB = *(B + 3);
+
+    int x1 = (xA > xB) ? xA : xB;
+    int y1 = (yA > yB) ? yA : yB;
+
+    int x2 = (xA + wA < xB + wB) ? (xA + wA) : (xB + wB);
+    int y2 = (yA + hA < yB + hB) ? (yA + hA) : (yB + hB);
+
+    if (x2 > x1 && y2 > y1) {
+        *(C + 0) = x1;
+        *(C + 1) = y1;
+        *(C + 2) = x2 - x1;
+        *(C + 3) = y2 - y1;
+        return true;
+    }
+
+    *(C + 0) = 0;
+    *(C + 1) = 0;
+    *(C + 2) = 0;
+    *(C + 3) = 0;
+    return false;
+}
+
+long sumaDivisores(int n) {
+    if (n <= 1) {
+        return 0;
+    }
+
+    long suma = 1;
+
+    for (int d = 2; (long)d * d <= n; d++) {
+        if (n % d == 0) {
+            suma += d;
+            int otro = n / d;
+            if (otro != d) {
+                suma += otro;
+            }
+        }
+    }
+
+    return suma;
+}
+
+void sumaAmigables(int limite, long *resultado) {
+    *resultado = 0;
+
+    for (int a = 2; a < limite; a++) {
+        long b = sumaDivisores(a);
+
+        if (b != a && b >= 2 && sumaDivisores((int)b) == a) {
+            *resultado += a;
+        }
+    }
 }
 
 

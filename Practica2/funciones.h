@@ -16,10 +16,17 @@ const int FILAS = 15;
 const int COLUMNAS = 20;
 const char DISPONIBLE = '-';
 const char RESERVADO = '+';
-void inicializarSala(char sala[][COLUMNAS]);
-void mostrarSala(char sala[][COLUMNAS]);
-bool reservarAsiento(char sala[][COLUMNAS], char filaLetra, int asiento);
-bool cancelarAsiento(char sala[][COLUMNAS], char filaLetra, int asiento);
+void inicializarSala(char *sala);
+void mostrarSala(char *sala);
+bool reservarAsiento(char *sala, char filaLetra, int asiento);
+bool cancelarAsiento(char *sala, char filaLetra, int asiento);
+bool asientoValido(char filaLetra, int asiento);
 
+int contarEstrellas(int *matriz, int filas, int columnas);
+
+bool intersectarRectangulos(const int *A, const int *B, int *C);
+
+long sumaDivisores(int n);
+void sumaAmigables(int limite, long *resultado);
 
 #endif
