@@ -200,6 +200,7 @@ bool reservarAsiento(char *sala, char filaLetra, int asiento) {
 
     if (*(sala + indice) == DISPONIBLE) {
         *(sala + indice) = RESERVADO;
+        cout<< &sala + indice;
         return true;
     }
 
