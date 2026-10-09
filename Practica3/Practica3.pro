@@ -4,8 +4,12 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        funciones.cpp \
-        main.cpp
+        encriptacion.cpp \
+        lz78.cpp \
+        main.cpp \
+        rle.cpp
 
 HEADERS += \
-    funciones.h
+    encriptacion.h \
+    lz78.h \
+    rle.h

@@ -1,67 +1,9 @@
-#include "funciones.h"
-#include <cctype>
+#include "lz78.h"
 #include <stdexcept>
+
 using namespace std;
 
-//ejercicio 5.1
-string comprimirRLE(const string& texto) {
-    if (texto.empty()) {
-        throw invalid_argument("El texto a comprimir esta vacio.");
-    }
-
-    string resultado = "";
-    int contador = 1;
-
-    for (size_t i = 1; i <= texto.size(); i++) {
-        if (i < texto.size() && texto[i] == texto[i - 1]) {
-            contador++;
-        } else {
-            resultado += to_string(contador);
-            resultado += texto[i - 1];
-            contador = 1;
-        }
-    }
-
-    return resultado;
-}
-
-string descomprimirRLE(const string& comprimido) {
-    if (comprimido.empty()) {
-        throw invalid_argument("El texto comprimido esta vacio.");
-    }
-
-    string resultado = "";
-    size_t i = 0;
-
-    while (i < comprimido.size()) {
-        string numStr = "";
-        while (i < comprimido.size() && isdigit(comprimido[i])) {
-            numStr += comprimido[i];
-            i++;
-        }
-
-        if (numStr.empty()) {
-            throw runtime_error("Formato invalido: se esperaba un numero antes del caracter.");
-        }
-
-        if (i >= comprimido.size()) {
-            throw runtime_error("Formato invalido: falta el caracter luego del numero.");
-        }
-
-        int repeticiones = stoi(numStr);
-        char c = comprimido[i];
-        i++;
-
-        for (int j = 0; j < repeticiones; j++) {
-            resultado += c;
-        }
-    }
-
-    return resultado;
-}
-
-//ejercicio 5.2
-
+// Duplica la capacidad del arreglo dinamico del diccionario.
 static void crecerDiccionario(EntradaDiccionario*& diccionario, int& capacidad) {
     int nuevaCapacidad = capacidad * 2;
     EntradaDiccionario* nuevo = new EntradaDiccionario[nuevaCapacidad];
@@ -73,6 +15,7 @@ static void crecerDiccionario(EntradaDiccionario*& diccionario, int& capacidad) 
     capacidad = nuevaCapacidad;
 }
 
+// Duplica la capacidad del arreglo dinamico de pares de salida.
 static void crecerPares(ParLZ78*& pares, int& capacidad) {
     int nuevaCapacidad = capacidad * 2;
     ParLZ78* nuevo = new ParLZ78[nuevaCapacidad];
@@ -88,6 +31,7 @@ ParLZ78* comprimirLZ78(const char* texto, int& cantidadPares) {
     if (texto == nullptr || texto[0] == '\0') {
         throw invalid_argument("El texto a comprimir esta vacio.");
     }
+
     int capacidadDicc = 4;
     int tamDicc = 0;
     EntradaDiccionario* diccionario = new EntradaDiccionario[capacidadDicc];
@@ -97,14 +41,16 @@ ParLZ78* comprimirLZ78(const char* texto, int& cantidadPares) {
     ParLZ78* pares = new ParLZ78[capacidadPares];
 
     int i = 0;
-    int prefijoActual = 0;
+    int prefijoActual = 0; // 0 = cadena vacia
 
     while (texto[i] != '\0') {
         char c = texto[i];
+
+        // Busqueda lineal de (prefijoActual, c) en el diccionario
         int encontrado = -1;
         for (int k = 0; k < tamDicc; k++) {
             if (diccionario[k].prefijo == prefijoActual && diccionario[k].caracter == c) {
-                encontrado = k + 1;
+                encontrado = k + 1; // indices 1-based
                 break;
             }
         }
@@ -128,10 +74,12 @@ ParLZ78* comprimirLZ78(const char* texto, int& cantidadPares) {
             diccionario[tamDicc].caracter = c;
             tamDicc++;
 
-            prefijoActual = 0; // reiniciamos, volvemos a la raiz
+            prefijoActual = 0;
             i++;
         }
     }
+
+    // El texto termino en medio de una coincidencia: se emite solo el indice.
     if (prefijoActual != 0) {
         if (cantidadPares == capacidadPares) {
             crecerPares(pares, capacidadPares);
@@ -224,58 +172,3 @@ char* descomprimirLZ78(const ParLZ78* pares, int cantidadPares) {
 
     return resultado;
 }
-
-//ejercicio 5.3
-unsigned char rotarIzquierda(unsigned char byte, int n) {
-    n = n % 8;
-    return (unsigned char)((byte << n) | (byte >> (8 - n)));
-}
-
-unsigned char rotarDerecha(unsigned char byte, int n) {
-    n = n % 8;
-    return (unsigned char)((byte >> n) | (byte << (8 - n)));
-}
-
-
-unsigned char encriptarByte(unsigned char byte, int n, unsigned char clave) {
-    unsigned char rotado = rotarIzquierda(byte, n);
-    return rotado ^ clave;
-}
-
-unsigned char desencriptarByte(unsigned char byte, int n, unsigned char clave) {
-    // Paso 1: deshacer el XOR (A ^ K ^ K = A)
-    unsigned char sinXor = byte ^ clave;
-    // Paso 2: deshacer la rotacion, rotando en sentido contrario
-    return rotarDerecha(sinXor, n);
-}
-
-unsigned char* encriptarDatos(const unsigned char* datos, int longitud, int n, unsigned char clave) {
-    if (datos == nullptr || longitud <= 0) {
-        throw invalid_argument("Los datos a encriptar son invalidos o estan vacios.");
-    }
-    if (n <= 0 || n >= 8) {
-        throw out_of_range("El valor de rotacion n debe cumplir 0 < n < 8.");
-    }
-
-    unsigned char* resultado = new unsigned char[longitud];
-    for (int i = 0; i < longitud; i++) {
-        resultado[i] = encriptarByte(datos[i], n, clave);
-    }
-    return resultado;
-}
-
-unsigned char* desencriptarDatos(const unsigned char* datos, int longitud, int n, unsigned char clave) {
-    if (datos == nullptr || longitud <= 0) {
-        throw invalid_argument("Los datos a desencriptar son invalidos o estan vacios.");
-    }
-    if (n <= 0 || n >= 8) {
-        throw out_of_range("El valor de rotacion n debe cumplir 0 < n < 8.");
-    }
-
-    unsigned char* resultado = new unsigned char[longitud];
-    for (int i = 0; i < longitud; i++) {
-        resultado[i] = desencriptarByte(datos[i], n, clave);
-    }
-    return resultado;
-}
-
