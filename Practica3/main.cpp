@@ -135,6 +135,7 @@ int main() {
             }
 
             case 4: { // 5.4 Integracion completa
+
                 // 1. Pedir todos los datos primero (y validarlos antes de reservar memoria)
                 char rutaEntrada[MAX_RUTA];
                 char rutaSalida[MAX_RUTA];
@@ -286,7 +287,7 @@ int main() {
                     for (int i = 0; i < cantidadPares; i++) {
                         int base = i * tamPorPar;
                         memcpy(&serializado[base], &pares[i].indice, sizeof(int));
-                        serializado[base + sizeof(int)] = (unsigned char)pares[i].caracter;
+                        serializado[base + sizeof(int)] = (unsigned char)pares[i].caracter; //guarda el caracter
                         serializado[base + sizeof(int) + 1] = pares[i].esFinal ? 1 : 0;
                     }
 

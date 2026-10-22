@@ -66,6 +66,7 @@ char* descomprimirRLE(const char* comprimidoC) {
         }
 
         int repeticiones = stoi(numStr);
+
         if (repeticiones <= 0) {
             throw runtime_error("Formato invalido: el contador debe ser mayor que 0.");
         }
