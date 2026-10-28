@@ -3,13 +3,17 @@
 
 #include <string>
 #include <map>
+#include <list>
 #include "enrutador.h"
+#include "camino.h"
 
 using namespace std;
 
 class Red {
 private:
     map<string, Enrutador> enrutadores;   // nombre -> enrutador
+
+    void dijkstra(const string& origen);  // calcula costos y caminos desde origen
 
 public:
     Red();
@@ -22,9 +26,15 @@ public:
     bool agregarEnlace(const string& a, const string& b, int costo);
     bool eliminarEnlace(const string& a, const string& b);
 
-    void actualizarTablas();      //  tablas con destinos directos
-    void mostrarRed() const;      // enrutadores y sus vecinos
-    void mostrarTablas() const;   // tabla de costos de cada enrutador
+    bool cargarDesdeArchivo(const string& ruta);
+
+    void actualizarTablas();
+    Camino obtenerCamino(const string& origen, const string& destino) const;
+    void mostrarCamino(const string& origen, const string& destino) const;
+
+    void mostrarRed() const;              // enrutadores y sus vecinos
+    void mostrarTablas() const;           // tabla de cada enrutador
+    bool mostrarTablaDe(const string& nombre) const;   // tabla de uno solo
 };
 
-#endif
+#endif // RED_H
