@@ -35,4 +35,4 @@ public:
     void reiniciarTabla();   // deja solo: costo 0 a sí mismo + vecinos directos
 };
 
-#endif // ENRUTADOR_H
+#endif

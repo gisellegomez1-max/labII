@@ -37,4 +37,4 @@ public:
     bool mostrarTablaDe(const string& nombre) const;   // tabla de uno solo
 };
 
-#endif // RED_H
+#endif
